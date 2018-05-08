@@ -1,0 +1,158 @@
+
+---
+title: "Wikipediatrend Introduction"
+author: 
+  - Melissa Wilson
+output: 
+  html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
+```
+
+# Description
+
+- There are many WikiMedia packages available with different purposes, but we will focus on Wikipediatrend
+- Wikipediatrend is an interface between R and Wikipedia that allows you to quickly access page traffic to wiki pages
+
+
+# Install
+
+- First we will install the packages using `Install.packages("WikipediR", "WikipediaR", "Wikidata", "Wikipediatrend")`
+
+- The only one we really need is wikipediatrend, but might as well get the other commonly used packages while you're at it
+
+
+# Get Main Page Traffic Data
+
+- We want to access daily page view counts
+- The most important function you will need to know in order to use this package is `wp_trend()` because it will help us extract the page count data from Wikipedia
+
+```{r eval=FALSE, echo=TRUE}
+library(wikipediatrend)
+page_views <- wp_trend("main_page")
+```
+
+- Note: You may see the message 
+```{r}
+"The wikipediatrend package currently has no server providing any page view information. Use package pageviews for recent (2016+) information. Older information hopefully available again soon."
+```
+
+- To get around this issue, I installed the development version
+
+```{r eval=FALSE, echo=TRUE}
+devtools::install_github("petermeissner/wikipediatrend")
+
+library(wikipediatrend)
+page_views <- wp_trend("main_page")
+page_views
+```
+
+-Now we can see the data
+
+```{r eval=FALSE, echo=TRUE}
+ggplot(page_views, aes(x=date, y=views, group=article, color=article)) +
+  geom_line(size=1) + theme_bw()
+```
+
+
+# Example 1
+
+- Let's try some examples!
+
+```{r eval=FALSE, echo=TRUE}
+page_views1 <- 
+  wp_trend( 
+    page = c( "Fake_news")
+  )
+```
+
+```{r eval=FALSE, echo=TRUE}
+library(tidyverse)
+
+ggplot(page_views1, aes(x=date, y=views, color = wp_day(date))) +
+  geom_line(size=1) + 
+  theme_bw()
+
+```
+
+- Or we can look at a specific time period
+
+```{r eval=FALSE, echo=TRUE}
+page_views2 <- 
+  wp_trend( 
+    page = c("Fake_news") ,
+    from = "2018-04-16",
+    to = "2018-04-30"
+  )
+```
+
+```{r eval=FALSE, echo=TRUE}
+library(tidyverse)
+
+ggplot(page_views2, aes(x=date, y=views, color=wp_day(date))) +
+  geom_line(size=1) + theme_bw()
+
+```
+
+- Notice the traffic drop on the weekends?
+
+
+# Example 2
+
+- What if you want to use multiple wiki articles?
+- You simply list them!
+
+```{r eval=FALSE, echo=TRUE}
+page_views3 <- 
+  wp_trend( 
+    page = c( "Tropical_cyclone", "Saffir-Simpson_scale"), 
+    from = "2016-01-01",
+    to   = "2018-05-01" #prev_month_end() should also work, but it was not working for me 
+  ) #Saffir-Simpson scale measures hurricane categories
+```
+
+- Be sure to specify the group as 'article' because you are using more than one page's traffic data
+
+```{r eval=FALSE, echo=TRUE}
+library(tidyverse)
+
+ggplot(page_views3, aes(x=date, y=views, group=article, color=article, fill=article)) +
+  geom_line() + theme_bw()
+```
+- We can see a giant spike about the time hurrican Irma turned up last year.
+
+
+# Example 3
+
+- Marvel page (No spoilers, I promise!)
+
+```{r eval=FALSE, echo=TRUE}
+page_views4 <- 
+  wp_trend( 
+    page = c( "List_of_films_based_on_Marvel_Comics"), 
+    from = "2018-01-01",
+    to = "2018-05-05"
+  ) 
+```
+
+```{r eval=FALSE, echo=TRUE}
+library(tidyverse)
+
+ggplot(page_views4, aes(x=date, y=views, color=article)) +
+  geom_line(size=1, color="pink") +
+  theme_bw()
+```
+
+- There is an obvious spike around Apr 27th-29th due to the release of Avengers: Infinity War
+
+
+
+
+
+
+
+
+
+
